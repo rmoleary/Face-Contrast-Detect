@@ -89,10 +89,17 @@ def get_contrast_peak(fn):
         eyestd.append( lap_eyeimg.std())
         #print "Face std", lap_faceimg.std(), " and eye stds ", eyestd, per99, percentile(lap_faceimg,99.9)
 
+
+    print "# Face contrast: ", lap_faceimg.std(), "eyes: ", eyestd
+    #Occasionally a single eye has a flash or spot in it giving it a large contrast.  Only use if eyes are within 50%
+    
     if ((ew*eh < 100) & (lap_faceimg.std() > max(eyestd))):
         return  lap_faceimg.std()
-    else:
-        return max(eyestd)
+    if(max(eyestd) > 1.75 * min(eyestd)):
+        #Occasionally a single eye has a flash or spot in it giving it a large contrast.  Only use if eyes are within 50%
+        return lap_faceimg.std()
+        
+    return max(eyestd)
 
 
 
