@@ -116,16 +116,16 @@ predictor = dlib.shape_predictor(predictor_path)
 stds = zeros(len(files))
 for i,fn in enumerate(files):
 #    try:
-    print "Analyzing ", fn
+    print "#Analyzing ", fn
     stds[i] = get_contrast_peak(fn)
-    print "        Contrast:  ", stds[i]
+    print "#        Contrast:  ", stds[i]
  #   except:
   #      print "failure in file", fn
 
 ngood = stds[stds>0].size
 index_best = stds.argmax()
 
-print "Detected faces in ", ngood, " of ", stds.size, "faces."
-print "Highest contrast picture was ", files[index_best]
+print "#Detected faces in ", ngood, " of ", stds.size, "faces."
+print "#Highest contrast picture was \n", files[index_best]
 
         
