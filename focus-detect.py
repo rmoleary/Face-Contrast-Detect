@@ -58,6 +58,20 @@ def get_contrast_peak(fn):
         #did not detect faces. This is slightly slower
         imgmp =  cv2.cvtColor(img, cv2.cv.CV_BGR2RGB) #this is to plot images using matplotlib
         faces = detector(imgmp,1)
+    if(len(faces) == 0 ):
+        #now try rotation
+        print "#Try Rotation"
+        NN = 5
+        rows,cols = gray.shape
+        for j,i in enumerate(linspace(360./NN,360*(NN-1)*1./NN,NN)):
+            M = cv2.getRotationMatrix2D((cols/2,rows/2),i,1)
+            dst = cv2.warpAffine(img,M,(cols,rows))
+            faces = detector(dst)
+            if(len(faces)>0):
+                img = dst
+                gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                imgmp =  cv2.cvtColor(img, cv2.cv.CV_BGR2RGB) #this is to plot images using matplotlib
+                break
     if(len(faces) == 0):
         #still found no faces
         return -1.0
@@ -69,6 +83,9 @@ def get_contrast_peak(fn):
         fshapes.append(shape)
         areas[k] = d.area()
 
+    if(max(areas) < 50*50):
+        #face too small
+        return -1.0
     index = (areas).argmax()
     shape = fshapes[index]
     

@@ -22,21 +22,21 @@ import dlib
 
 # Import the image and load grayscale version of it
 
-# In[218]:
+# In[323]:
 
 img = cv2.imread('imgs/20160306_IMG_2790p.JPG')
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 imgmp =  cv2.cvtColor(img, cv2.cv.CV_BGR2RGB) #this is to plot images using matplotlib
 
 
-# In[219]:
+# In[324]:
 
 detector = dlib.get_frontal_face_detector()
 predictor_path =  'facepredictor/shape_predictor_68_face_landmarks.dat'
 predictor = dlib.shape_predictor(predictor_path)
 
 
-# In[220]:
+# In[325]:
 
 t1 = time.time()
 #detect faces
@@ -44,7 +44,22 @@ t1 = time.time()
 faces = detector(gray)
 if(len(faces) == 0 ):
     #did not detect faces. This is slightly slower
+    print "Try color expanded"
     faces = detector(imgmp,1)
+if(len(faces) == 0 ):
+    #now try rotation
+    print "Try Rotation"
+    NN = 5
+    rows,cols = gray.shape
+    for j,i in enumerate(linspace(360./NN,360*(NN-1)*1./NN,NN)):
+        M = cv2.getRotationMatrix2D((cols/2,rows/2),i,1)
+        dst = cv2.warpAffine(img,M,(cols,rows))
+        faces = detector(dst)
+        if(len(faces)>0):
+            img = dst
+            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+            imgmp =  cv2.cvtColor(img, cv2.cv.CV_BGR2RGB) #this is to plot images using matplotlib
+            break
 #this could be sped up by rescaling large images
 t2 = time.time()
 print "It took ", t2-t1, "seconds to complete faces."
@@ -63,7 +78,12 @@ t3 = time.time()
 print "It took ", t3-t2, "seconds to find 68 point features."
 
 
-# In[221]:
+# In[ ]:
+
+
+
+
+# In[326]:
 
 #find largest face
 areas = zeros(len(faces))
@@ -73,7 +93,12 @@ index = (areas).argmax()
 shape = fshapes[index]
 
 
-# In[222]:
+# In[327]:
+
+sqrt(areas)
+
+
+# In[328]:
 
 def get_right_eye(shape):
     xpts = []
@@ -102,12 +127,12 @@ def get_left_eye(shape):
     return xpts.min(), ypts.min(), dx,dy
 
 
-# In[223]:
+# In[329]:
 
 print get_left_eye(shape), get_right_eye(shape)
 
 
-# In[224]:
+# In[330]:
 
 imshow(imgmp)
 f1 = faces[index]
@@ -126,17 +151,17 @@ axis([f1.center().x-2*dx,f1.center().x+2*dx,f1.center().y + 2 * dx, f1.center().
 #axis([x-2.5*w,x+3.5*w,y+3.5*h,y-2.5*h])
 
 
-# In[225]:
+# In[331]:
 
 #eyes are at 36 - 41 and 42 - 47
 
 
-# In[226]:
+# In[332]:
 
 eyes = ([get_left_eye(shape),get_right_eye(shape)])
 
 
-# In[227]:
+# In[333]:
 
 #calculate contrast inside face region
 #We use a Laplacian filter to estimate the amount of contrast in the image following http://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
@@ -157,7 +182,7 @@ for (ex,ey,ew,eh) in array(eyes):
 print "Face std", lap_faceimg.std(), " and eye stds ", eyestd, per99, percentile(lap_faceimg,99.9)
 
 
-# In[228]:
+# In[334]:
 
 if( lap_faceimg.std() > max(eyestd) ):
     print "Face is Most in focus"
@@ -165,6 +190,11 @@ else:
     print "Eye #", argmax(eyestd) + 1, " is most in focus"
     imshow(eyeimgs[argmax(eyestd)],cmap='gray')
     
+
+
+# In[ ]:
+
+
 
 
 # In[ ]:
